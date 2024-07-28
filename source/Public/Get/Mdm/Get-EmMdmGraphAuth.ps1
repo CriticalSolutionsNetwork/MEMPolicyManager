@@ -95,17 +95,13 @@
 function Get-EmMdmGraphAuth {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true, ParameterSetName = "ClientSecret", Position = 0, HelpMessage = "The Client ID for the application using Client Secret authentication.")]
-        [ValidateNotNullOrEmpty()]
-        [string]$ClientSecretId,
-
-        [Parameter(Mandatory = $true, ParameterSetName = "ClientSecret", Position = 1, HelpMessage = "The Tenant ID for the application using Client Secret authentication.")]
+        [Parameter(Mandatory = $true, ParameterSetName = "ClientSecret", Position = 0, HelpMessage = "The Tenant ID for the application using Client Secret authentication.")]
         [ValidateNotNullOrEmpty()]
         [string]$ClientSecretTenantId,
 
-        [Parameter(Mandatory = $true, ParameterSetName = "ClientSecret", Position = 2, HelpMessage = "The Client Secret value for the application using Client Secret authentication.")]
+        [Parameter(Mandatory = $true, ParameterSetName = "ClientSecret", Position = 1, HelpMessage = "The Client Secret value for the application using Client Secret authentication.")]
         [ValidateNotNullOrEmpty()]
-        [string]$ClientSecretValue,
+        [System.Management.Automation.PSCredential]$ClientSecretValue,
 
         [Parameter(Mandatory = $true, ParameterSetName = "CertificateThumbprint", Position = 0, HelpMessage = "The Client ID for the application using Certificate Thumbprint authentication.")]
         [ValidateNotNullOrEmpty()]
@@ -167,7 +163,7 @@ function Get-EmMdmGraphAuth {
     )
     switch ($PSCmdlet.ParameterSetName) {
         "ClientSecret" {
-            return [EmMdmAuthClientSecret]::new($ClientSecretId, $ClientSecretTenantId, $ClientSecretValue)
+            return [EmMdmAuthClientSecret]::new($ClientSecretTenantId, $ClientSecretValue)
         }
         "CertificateThumbprint" {
             return [EmMdmAuthCertificateThumbprint]::new($CertificateThumbprintClientId, $CertificateThumbprintTenantId, $CertificateThumbprint)

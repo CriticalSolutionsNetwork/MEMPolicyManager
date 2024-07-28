@@ -35,7 +35,7 @@ function Connect-EmMdmGraph {
         if ($AuthObject) {
             switch ($AuthObject.GetType().Name) {
                 "EmMdmAuthClientSecret" {
-                    Connect-MgGraph -ClientId $AuthObject.ClientSecretId -TenantId $AuthObject.ClientSecretTenantId -ClientSecret $AuthObject.ClientSecretValue -Scopes $Scopes | Out-Null
+                    Connect-MgGraph -TenantId $AuthObject.ClientSecretTenantId -ClientSecret $AuthObject.ClientSecretValue #-Scopes $Scopes | Out-Null
                 }
                 "EmMdmAuthCertificateThumbprint" {
                     Connect-MgGraph -ClientId $AuthObject.CertificateThumbprintClientId -TenantId $AuthObject.CertificateThumbprintTenantId -CertificateThumbprint $AuthObject.CertificateThumbprint -Scopes $Scopes | Out-Null

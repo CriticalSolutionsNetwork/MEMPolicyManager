@@ -5,11 +5,9 @@ class EmMdmAuthBase {
 
 # Client secret authentication class
 class EmMdmAuthClientSecret : EmMdmAuthBase {
-    [string]$ClientSecretId
     [string]$ClientSecretTenantId
-    [string]$ClientSecretValue
-    EmMdmAuthClientSecret([string]$clientSecretId, [string]$clientSecretTenantId, [string]$clientSecretValue) : base() {
-        $this.ClientSecretId = $clientSecretId
+    [System.Management.Automation.PSCredential]$ClientSecretValue
+    EmMdmAuthClientSecret([string]$clientSecretTenantId, [System.Management.Automation.PSCredential]$clientSecretValue) : base() {
         $this.ClientSecretTenantId = $clientSecretTenantId
         $this.ClientSecretValue = $clientSecretValue
     }
