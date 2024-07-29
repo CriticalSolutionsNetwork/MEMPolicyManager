@@ -16,4 +16,3 @@ markdownissues.txt
 node_modules
 package-lock.json
 testfile.ps1
-/helpers/psDoc-master/Build-Help.ps1
