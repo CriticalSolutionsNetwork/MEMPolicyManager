@@ -5,7 +5,7 @@ Import-Module .\output\module\MemPolicyManager\
 
 
 <#
-    $ver = "v0.0.1"
+    $ver = "v0.1.2"
     git checkout main
     git pull origin main
     git tag -a $ver -m "Release version $ver"
