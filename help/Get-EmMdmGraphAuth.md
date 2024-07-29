@@ -14,7 +14,7 @@ Creates an authentication object for connecting to Microsoft Graph using various
 
 ### ClientSecret
 ```
-Get-EmMdmGraphAuth [-ClientSecretId] <String> [-ClientSecretTenantId] <String> [-ClientSecretValue] <String>
+Get-EmMdmGraphAuth [-ClientSecretTenantId] <String> [-ClientSecretValue] <PSCredential>
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
@@ -52,9 +52,8 @@ Get-EmMdmGraphAuth [-EnvironmentVariable] [-ProgressAction <ActionPreference>] [
 
 ### X509Certificate
 ```
-Get-EmMdmGraphAuth [-ClientId] <String> [-CertificateSubjectName] <String>
- [-X509CertificateThumbprint] <String> [-Certificate] <X509Certificate2> [-TenantId] <String>
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Get-EmMdmGraphAuth [-X509CertificateClientId] <String> [-X509Certificate] <X509Certificate>
+ [-X509CertificateTenantId] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -113,8 +112,8 @@ Creates an authentication object using X509 Certificate authentication.
 
 ## PARAMETERS
 
-### -ClientSecretId
-The Client ID for the application using Client Secret authentication.
+### -ClientSecretTenantId
+The Tenant ID for the application using Client Secret authentication.
 Mandatory for ClientSecret parameter set.
 
 ```yaml
@@ -129,33 +128,17 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ClientSecretTenantId
-The Tenant ID for the application using Client Secret authentication.
-Mandatory for ClientSecret parameter set.
-
-```yaml
-Type: String
-Parameter Sets: ClientSecret
-Aliases:
-
-Required: True
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -ClientSecretValue
 The Client Secret value for the application using Client Secret authentication.
 Mandatory for ClientSecret parameter set.
 
 ```yaml
-Type: String
+Type: PSCredential
 Parameter Sets: ClientSecret
 Aliases:
 
 Required: True
-Position: 3
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -321,7 +304,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ClientId
+### -X509CertificateClientId
 The client id of your application for X509 certificate authentication.
 Mandatory for X509Certificate parameter set.
 
@@ -337,12 +320,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CertificateSubjectName
-The subject distinguished name of a certificate for X509 certificate authentication.
-Mandatory for X509Certificate parameter set.
+### -X509Certificate
+An X.509 certificate supplied during invocation.
 
 ```yaml
-Type: String
+Type: X509Certificate
 Parameter Sets: X509Certificate
 Aliases:
 
@@ -353,38 +335,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -X509CertificateThumbprint
-The thumbprint of your certificate for X509 certificate authentication.
-
-```yaml
-Type: String
-Parameter Sets: X509Certificate
-Aliases:
-
-Required: True
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Certificate
-An X.509 certificate supplied during invocation.
-Mandatory for X509Certificate parameter set.
-
-```yaml
-Type: X509Certificate2
-Parameter Sets: X509Certificate
-Aliases:
-
-Required: True
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TenantId
+### -X509CertificateTenantId
 The id of the tenant to connect to for X509 certificate authentication.
 Mandatory for X509Certificate parameter set.
 
@@ -394,7 +345,7 @@ Parameter Sets: X509Certificate
 Aliases:
 
 Required: True
-Position: 5
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

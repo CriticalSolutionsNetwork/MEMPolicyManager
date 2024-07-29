@@ -1,4 +1,4 @@
----
+﻿---
 Module Name: MemPolicyManager
 Module Guid: 2c18ad4b-f554-4d44-8675-e3eb2ae4795d
 Download Help Link: {{ Update Download Link }}

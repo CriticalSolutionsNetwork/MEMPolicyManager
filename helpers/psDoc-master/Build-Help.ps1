@@ -51,12 +51,12 @@ Install-Module -Name "Microsoft.PowerShell.SecretManagement", `
 # Register Vault
 Register-SecretVault -Name ModuleBuildCreds -ModuleName `
 "SecretManagement.JustinGrote.CredMan" -ErrorAction Stop
+#set-secret -name "PowerAppsApiToken" -Vault ModuleBuildCreds
 
+#Set-Secret -Name "GalleryApiToken" -Vault ModuleBuildCreds
+#Set-Secret -Name "GitHubToken" -Vault ModuleBuildCreds
 
-Set-Secret -Name "GalleryApiToken" -Vault ModuleBuildCreds
-Set-Secret -Name "GitHubToken" -Vault ModuleBuildCreds
-
-
+$ClientSecret = Get-Secret -Name "PowerAppsApiToken" -Vault ModuleBuildCreds -AsPlainText
 $GalleryApiToken = Get-Secret -Name "GalleryApiToken" -Vault ModuleBuildCreds -AsPlainText
 $GitHubToken = Get-Secret -Name "GitHubToken" -Vault ModuleBuildCreds -AsPlainText
 

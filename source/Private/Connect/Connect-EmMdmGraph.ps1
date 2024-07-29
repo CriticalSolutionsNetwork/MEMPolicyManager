@@ -35,13 +35,13 @@ function Connect-EmMdmGraph {
         if ($AuthObject) {
             switch ($AuthObject.GetType().Name) {
                 "EmMdmAuthClientSecret" {
-                    Connect-MgGraph -TenantId $AuthObject.ClientSecretTenantId -ClientSecret $AuthObject.ClientSecretValue #-Scopes $Scopes | Out-Null
+                    Connect-MgGraph -TenantId $AuthObject.ClientSecretTenantId -ClientSecret $AuthObject.ClientSecretValue | Out-Null #-Scopes $Scopes
                 }
                 "EmMdmAuthCertificateThumbprint" {
-                    Connect-MgGraph -ClientId $AuthObject.CertificateThumbprintClientId -TenantId $AuthObject.CertificateThumbprintTenantId -CertificateThumbprint $AuthObject.CertificateThumbprint -Scopes $Scopes | Out-Null
+                    Connect-MgGraph -ClientId $AuthObject.CertificateThumbprintClientId -TenantId $AuthObject.CertificateThumbprintTenantId -CertificateThumbprint $AuthObject.CertificateThumbprint | Out-Null #-Scopes $Scopes
                 }
                 "EmMdmAuthCertificateName" {
-                    Connect-MgGraph -ClientId $AuthObject.CertificateNameClientId -TenantId $AuthObject.CertificateNameTenantId -CertificateName $AuthObject.CertificateName -Scopes $Scopes | Out-Null
+                    Connect-MgGraph -ClientId $AuthObject.CertificateNameClientId -TenantId $AuthObject.CertificateNameTenantId -CertificateName $AuthObject.CertificateName | Out-Null #-Scopes $Scopes
                 }
                 "EmMdmAuthManagedIdentity" {
                     Connect-MgGraph -Identity -Scopes $Scopes | Out-Null
@@ -53,7 +53,7 @@ function Connect-EmMdmGraph {
                     Connect-MgGraph -EnvironmentVariable -Scopes $Scopes | Out-Null
                 }
                 "EmMdmAuthX509Certificate" {
-                    Connect-MgGraph -ClientId $AuthObject.ClientId -CertificateSubjectName $AuthObject.CertificateSubjectName -CertificateThumbprint $AuthObject.CertificateThumbprint -Certificate $AuthObject.Certificate -TenantId $AuthObject.TenantId -Scopes $Scopes | Out-Null
+                    Connect-MgGraph -ClientId $AuthObject.ClientId  -TenantId $AuthObject.TenantId -Certificate $AuthObject.Certificate | Out-Null #-Scopes $Scopes | Out-Null
                 }
             }
         } else {

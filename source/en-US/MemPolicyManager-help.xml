@@ -3057,18 +3057,6 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
       <command:syntaxItem>
         <maml:name>Get-EmMdmGraphAuth</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-          <maml:name>ClientSecretId</maml:name>
-          <maml:description>
-            <maml:para>The Client ID for the application using Client Secret authentication. Mandatory for ClientSecret parameter set.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>ClientSecretTenantId</maml:name>
           <maml:description>
             <maml:para>The Tenant ID for the application using Client Secret authentication. Mandatory for ClientSecret parameter set.</maml:para>
@@ -3080,14 +3068,14 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>ClientSecretValue</maml:name>
           <maml:description>
             <maml:para>The Client Secret value for the application using Client Secret authentication. Mandatory for ClientSecret parameter set.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>PSCredential</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -3316,7 +3304,7 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
       <command:syntaxItem>
         <maml:name>Get-EmMdmGraphAuth</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-          <maml:name>ClientId</maml:name>
+          <maml:name>X509CertificateClientId</maml:name>
           <maml:description>
             <maml:para>The client id of your application for X509 certificate authentication. Mandatory for X509Certificate parameter set.</maml:para>
           </maml:description>
@@ -3328,43 +3316,19 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
-          <maml:name>CertificateSubjectName</maml:name>
+          <maml:name>X509Certificate</maml:name>
           <maml:description>
-            <maml:para>The subject distinguished name of a certificate for X509 certificate authentication. Mandatory for X509Certificate parameter set.</maml:para>
+            <maml:para>An X.509 certificate supplied during invocation.</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">X509Certificate</command:parameterValue>
           <dev:type>
-            <maml:name>String</maml:name>
+            <maml:name>X509Certificate</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
-          <maml:name>X509CertificateThumbprint</maml:name>
-          <maml:description>
-            <maml:para>The thumbprint of your certificate for X509 certificate authentication.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
-          <maml:name>Certificate</maml:name>
-          <maml:description>
-            <maml:para>An X.509 certificate supplied during invocation. Mandatory for X509Certificate parameter set.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">X509Certificate2</command:parameterValue>
-          <dev:type>
-            <maml:name>X509Certificate2</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
-          <maml:name>TenantId</maml:name>
+          <maml:name>X509CertificateTenantId</maml:name>
           <maml:description>
             <maml:para>The id of the tenant to connect to for X509 certificate authentication. Mandatory for X509Certificate parameter set.</maml:para>
           </maml:description>
@@ -3391,18 +3355,6 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
     </command:syntax>
     <command:parameters>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-        <maml:name>ClientSecretId</maml:name>
-        <maml:description>
-          <maml:para>The Client ID for the application using Client Secret authentication. Mandatory for ClientSecret parameter set.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>ClientSecretTenantId</maml:name>
         <maml:description>
           <maml:para>The Tenant ID for the application using Client Secret authentication. Mandatory for ClientSecret parameter set.</maml:para>
@@ -3414,14 +3366,14 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>ClientSecretValue</maml:name>
         <maml:description>
           <maml:para>The Client Secret value for the application using Client Secret authentication. Mandatory for ClientSecret parameter set.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">PSCredential</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>PSCredential</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -3547,7 +3499,7 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-        <maml:name>ClientId</maml:name>
+        <maml:name>X509CertificateClientId</maml:name>
         <maml:description>
           <maml:para>The client id of your application for X509 certificate authentication. Mandatory for X509Certificate parameter set.</maml:para>
         </maml:description>
@@ -3559,43 +3511,19 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
-        <maml:name>CertificateSubjectName</maml:name>
+        <maml:name>X509Certificate</maml:name>
         <maml:description>
-          <maml:para>The subject distinguished name of a certificate for X509 certificate authentication. Mandatory for X509Certificate parameter set.</maml:para>
+          <maml:para>An X.509 certificate supplied during invocation.</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">X509Certificate</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>X509Certificate</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
-        <maml:name>X509CertificateThumbprint</maml:name>
-        <maml:description>
-          <maml:para>The thumbprint of your certificate for X509 certificate authentication.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
-        <maml:name>Certificate</maml:name>
-        <maml:description>
-          <maml:para>An X.509 certificate supplied during invocation. Mandatory for X509Certificate parameter set.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">X509Certificate2</command:parameterValue>
-        <dev:type>
-          <maml:name>X509Certificate2</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
-        <maml:name>TenantId</maml:name>
+        <maml:name>X509CertificateTenantId</maml:name>
         <maml:description>
           <maml:para>The id of the tenant to connect to for X509 certificate authentication. Mandatory for X509Certificate parameter set.</maml:para>
         </maml:description>
