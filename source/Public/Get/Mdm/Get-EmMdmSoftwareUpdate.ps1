@@ -29,7 +29,6 @@
     .LINK
         https://criticalsolutionsnetwork.github.io/MemPolicyManager/#Get-EmMdmSoftwareUpdate
 #>
-
 function Get-EmMdmSoftwareUpdate {
     [cmdletBinding(
         SupportsShouldProcess = $true,

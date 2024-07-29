@@ -5,11 +5,9 @@ class EmMdmAuthBase {
 
 # Client secret authentication class
 class EmMdmAuthClientSecret : EmMdmAuthBase {
-    [string]$ClientSecretId
     [string]$ClientSecretTenantId
-    [string]$ClientSecretValue
-    EmMdmAuthClientSecret([string]$clientSecretId, [string]$clientSecretTenantId, [string]$clientSecretValue) : base() {
-        $this.ClientSecretId = $clientSecretId
+    [System.Management.Automation.PSCredential]$ClientSecretValue
+    EmMdmAuthClientSecret([string]$clientSecretTenantId, [System.Management.Automation.PSCredential]$clientSecretValue) : base() {
         $this.ClientSecretTenantId = $clientSecretTenantId
         $this.ClientSecretValue = $clientSecretValue
     }
@@ -63,15 +61,12 @@ class EmMdmAuthEnvironmentVariable : EmMdmAuthBase {
 # X509 certificate authentication class
 class EmMdmAuthX509Certificate : EmMdmAuthBase {
     [string]$ClientId
-    [string]$CertificateSubjectName
-    [string]$CertificateThumbprint
-    [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate
     [string]$TenantId
-    EmMdmAuthX509Certificate([string]$clientId, [string]$certificateSubjectName, [string]$certificateThumbprint, [System.Security.Cryptography.X509Certificates.X509Certificate2]$certificate, [string]$tenantId) : base() {
+    [X509Certificate]$Certificate
+    EmMdmAuthX509Certificate([string]$clientId,[string]$tenantId, [X509Certificate]$certificate) : base() {
         $this.ClientId = $clientId
-        $this.CertificateSubjectName = $certificateSubjectName
-        $this.CertificateThumbprint = $certificateThumbprint
-        $this.Certificate = $certificate
         $this.TenantId = $tenantId
+        $this.Certificate = $certificate
+
     }
 }
