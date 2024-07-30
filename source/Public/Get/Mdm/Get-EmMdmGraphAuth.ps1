@@ -40,9 +40,9 @@
     .PARAMETER CertificateName
         The Certificate Name for the application using Certificate Name authentication.
         Mandatory for CertificateName parameter set.
-    .PARAMETER ManagedIdentity
+    .PARAMETER UserAuthManagedIdentity
         The Client ID for the Managed Identity.
-        Mandatory for ManagedIdentity parameter set.
+        Mandatory for UserAuthManagedIdentity parameter set.
     .PARAMETER SystemAssignedIdentity
         Indicates the use of a System Assigned Identity for authentication.
         Mandatory for SystemAssignedIdentity parameter set.
@@ -80,7 +80,7 @@
         PS> $authObject = Get-EmMdmGraphAuth -CertificateNameClientId $ClientId -CertificateNameTenantId $TenantId -CertificateName $CertName
         Creates an authentication object using Certificate Name authentication.
     .EXAMPLE
-        PS> $authObject = Get-EmMdmGraphAuth -ManagedIdentity "your-client-id"
+        PS> $authObject = Get-EmMdmGraphAuth -UserAuthManagedIdentity $ClientId
         Creates an authentication object using Managed Identity authentication.
     .EXAMPLE
         PS> $authObject = Get-EmMdmGraphAuth -SystemAssignedIdentity

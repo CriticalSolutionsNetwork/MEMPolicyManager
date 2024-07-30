@@ -4,7 +4,7 @@
 
 - The MemPolicyManager module provides a comprehensive set of cmdlets for managing Microsoft Endpoint Manager policies. This module allows administrators to perform various tasks such as backing up, importing, exporting, and comparing policies through the Microsoft Graph API. It aims to streamline policy management and ensure that configurations are consistent and easily recoverable.
 - The module is a personal project and is not officially supported by Microsoft. Use it at your own risk.
-- The project was born out of a lack of native PowerShell cmdlets for easily managing Microsoft Endpoint Manager policies. The module aims to fill this gap until Microsoft support is more robust.
+- The project was born out of a lack of native PowerShell cmdlets for easily managing Microsoft Endpoint Manager policies. The module aims to fill this gap, and assist me in developing my ability to work with MgGraph.
 - The module was inspired and borrows concepts and code from: https://github.com/microsoft/mggraph-intune-samples/tree/main
 
 ## Note
@@ -60,7 +60,7 @@ Import-EmMdmAppConfiguration -ImportPath "C:\Backup\AppConfigurationPolicy.json"
 ### Application Auth Examples
 
 ```powershell
-### Application Auth Examples
+# Application Auth Examples
 
 # Application Permissions required:
 #   DeviceManagementConfiguration.ReadWrite.All,
@@ -71,41 +71,103 @@ Import-EmMdmAppConfiguration -ImportPath "C:\Backup\AppConfigurationPolicy.json"
 # Application (client) ID, Tenant ID, and Client Secret are required.
     PS C:\> $ClientId = "12345678-1234-1234-1234-123456789012"
     PS C:\> $TenantId = "12345678-1234-1234-1234-123456789012"
-
-# To manually input the Client Secret value, use the following command:
-# $ClientSecretPSCredential = Get-Credential -Credential $ClientId
-# To provide the secret value in plain text, use the following command:
-# $ClientSecret = ConvertTo-SecureString "<ClientSecretValue>" -AsPlainText
-# To retrieve the secret value from a local Vault, use the following command:
+### Options for providing the Client Secret value
+    # To manually input the Client Secret value, use the following command:
+    PS C:\> $ClientSecretPSCredential = Get-Credential -Credential $ClientId
+    # To provide the secret value in plain text, use the following command:
+    PS C:\> $ClientSecret = ConvertTo-SecureString "<ClientSecretValue>" -AsPlainText
+    # To retrieve the secret value from a local Vault, use the following command:
     PS C:\> $ClientSecret = Get-Secret -Name "MgGraphSecret" -VaultName "EmMdmVault"
-# Create a PSAutomationCredential object with the Client ID and Client Secret.
+    # To Create a PSAutomationCredential object with the Client/App Id and Client Secret (as a secure string).
     PS C:\> $ClientSecretPSCredential = [PsCredential]::New($ClientId,$ClientSecret)
-# Create the authentication object with the Client Secret values.
-    PS C:\> $authObject = Get-EmMdmGraphAuth -ClientSecretTenantId $TenantId -ClientSecretValue $ClientSecretPSCredential
-    PS C:\> $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
 
+    # Create the authentication object with the Client Secret values.
+    PS C:\> $authObject = Get-EmMdmGraphAuth -ClientSecretTenantId $TenantId -ClientSecretValue $ClientSecretPSCredential
+    # Example Usage: Retrieve the policies using the authentication object.
+    PS C:\> $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
+### Options for providing the Client Secret value
+## Client Secret Authentication ##
+
+# Certificate Authentication Options
 ## Self-Signed Certificate Authentication ##
-    PS C:\> $CertName = "EmMdmMgGraphCert" # "{certificateName}"    ## Replace {certificateName}
+    # Create a self-signed certificate and export it to a file.
+    PS C:\> $CertName = "EmMdmMgGraphCert" # Replace CN=EmMdmMgGraphCert
     PS C:\> $cert = New-SelfSignedCertificate -Subject "CN=$CertName" -CertStoreLocation "Cert:\CurrentUser\My" `
     -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256
+    # Export the certificate to a file and upload the public key to the MgGraph application.
     PS C:\> Export-Certificate -Cert $cert -FilePath "C:\temp\$CertName.cer"   ## Specify your preferred location
+## Self-Signed Certificate Authentication ##
 
 ## Certificate Thumbprint Authentication ##
-    PS C:\> $ThumbPrint = $Cert.Thumbprint
+    # Retrieve the certificate thumbprint from the local certificate store using the previous steps.
+    PS C:\> $ThumbPrint = $cert.Thumbprint
+    # Retrieve the certificate thumbprint from a local Vault if saved previously.
     PS C:\> $ClientCertThumbPrint = Get-Secret -Name "EmMdmMgGraphThumbprint" -Vault "EmMdmVault" -AsPlainText
+    # Create the authentication object with the certificate thumbprint.
     PS C:\> $authObject = Get-EmMdmGraphAuth -CertificateThumbprintClientId $ClientId -CertificateThumbprintTenantId $TenantId -CertificateThumbprint $ClientCertThumbPrint
+    # Example Usage: Retrieve the policies using the authentication object.
     PS C:\> $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
+## Certificate Thumbprint Authentication ##
 
 ## Certificate Name Authentication ##
-    PS C:\> $CertName = "CN=EmMdmMgGraphCert" # "{certificateName}"    ## Replace {certificateName}
+    PS C:\> $CertName = "CN=EmMdmMgGraphCert"  ## Replace CN=EmMdmMgGraphCert
     PS C:\> $authObject = Get-EmMdmGraphAuth -CertificateNameClientId $ClientId -CertificateNameTenantId $TenantId -CertificateName $CertName
     PS C:\> $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
+## Certificate Name Authentication ##
 
 ## X509 Certificate Authentication ##
     PS C:\> $ThumbPrint = Get-Secret -Name "EmMdmMgGraphThumbprint" -Vault "EmMdmVault" -AsPlainText
     PS C:\> $Cert = Get-ChildItem Cert:\CurrentUser\My\$ThumbPrint
     PS C:\> $authObject = Get-EmMdmGraphAuth -X509CertificateClientId $ClientId -X509CertificateTenantId $TenantId -X509Certificate $Cert
     PS C:\> $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
+## X509 Certificate Authentication ##
+## Certificate Authentication Options
+
+## Access Token Authentication ##
+    # Instantiate the Client ID, Tenant ID, and Client Secret values.
+    $ClientId = "12345678-1234-1234-1234-123456789012"
+    $TenantId = "12345678-1234-1234-1234-123456789012"
+    $ClientSecret = Get-Secret -Name "MgGraphClientSecret" -Vault "EmMdmVault" -AsPlainText
+    $ContentType = "application/x-www-form-urlencoded"
+    $scope = "https://graph.microsoft.com/.default"
+    # Construct the URI
+    $uri = "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token"
+    # Construct the body of the request
+    $body = @{
+        client_id     = $ClientId
+        scope         = $scope
+        client_secret = $ClientSecret
+        grant_type    = "client_credentials"
+    }
+    # Make the POST request to get the token
+    $response = Invoke-RestMethod -Uri $uri -Method Post -ContentType $ContentType -Body $body
+    $AccessToken = $response.access_token |  ConvertTo-SecureString -AsPlainText -Force
+    # Create the authentication object with the access token.
+    $authObject = Get-EmMdmGraphAuth -AccessToken $AccessToken
+    # Example Usage: Retrieve the policies using the authentication object.
+    $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
+## Access Token Authentication ##
+
+## System Assigned Managed Identity Authentication (Azure Resource)##
+    # Create the authentication object
+    $authObject = Get-EmMdmGraphAuth -SystemAssignedIdentity
+    # Example Usage: Retrieve the policies using the authentication object.
+    $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
+## System Assigned Managed Identity Authentication (Azure Resource)##
+
+## User Assigned Managed Identity Authentication (Azure Resource)##
+    # Create the authentication object
+    $authObject = Get-EmMdmGraphAuth -UserAuthManagedIdentity "12345678-1234-1234-1234-123456789012"
+    # Example Usage: Retrieve the policies using the authentication object.
+    $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
+## User Assigned Managed Identity Authentication (Azure Resource)##
+
+## Connect using Environment Variables ##
+    # Set the environment variables
+    $authObject = Get-EmMdmGraphAuth -EnvironmentVariable
+    # Example Usage: Retrieve the policies using the authentication object.
+    $policies = Get-EmMdmAppConfiguration -AuthObject $authObject
+## Connect using Environment Variables ##
 ```
 
 ## Backup-EmMdmAppConfiguration
@@ -123,16 +185,16 @@ Backup-EmMdmAppConfiguration [-ExportPath] <String> [[-AuthObject] <EmMdmAuthBas
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ExportPath</nobr> |  | The directory path where the App Configuration policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ExportPath</nobr> |  | The directory path where the App Configuration policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a directory path as input.
+ - \[string\] The cmdlet accepts a directory path as input.
 
 ### Outputs
- - \\[void\] This cmdlet does not output any objects.
+ - \[void\] This cmdlet does not output any objects.
 
 ### Note
 The cmdlet uses the following functions: - New-EmMdmBackupDirectory - Connect-EmMdmGraph - Get-EmMdmAppConfigurationAPI - Backup-EmMdmPolicy - Disconnect-MgGraph
@@ -171,16 +233,16 @@ Backup-EmMdmAppProtection [-ExportPath] <String> [[-AuthObject] <EmMdmAuthBase>]
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ExportPath</nobr> |  | The directory path where the App Protection policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ExportPath</nobr> |  | The directory path where the App Protection policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a directory path as input.
+ - \[string\] The cmdlet accepts a directory path as input.
 
 ### Outputs
- - \\[void\] This cmdlet does not output any objects.
+ - \[void\] This cmdlet does not output any objects.
 
 ### Note
 The cmdlet uses the following functions: - New-EmMdmBackupDirectory - Connect-EmMdmGraph - Get-EmMdmAppProtectionAPI - Backup-EmMdmPolicy - Disconnect-MgGraph
@@ -211,17 +273,17 @@ Backup-EmMdmCompliance [-ExportPath] <String> [[-OperatingSystem] <String>] [[-A
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ExportPath</nobr> |  | The directory path where the Device Compliance policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ExportPath</nobr> |  | The directory path where the Device Compliance policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>OperatingSystem</nobr> |  | The operating system filter for the compliance policies. Valid values are "android", "iOS", "Win10", "macos", and "all". The default value is "all". | false | false | all |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a directory path as input.
+ - \[string\] The cmdlet accepts a directory path as input.
 
 ### Outputs
- - \\[string\] This cmdlet returns the export path upon successful completion.
+ - \[string\] This cmdlet returns the export path upon successful completion.
 
 ### Note
 The cmdlet uses the following functions: - New-EmMdmBackupDirectory - Connect-EmMdmGraph - Get-EmMdmComplianceAPI - Backup-EmMdmPolicy - Disconnect-MgGraph
@@ -260,16 +322,16 @@ Backup-EmMdmConfiguration [[-DeviceType] <String>] [-ExportPath] <String> [[-Aut
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
 | <nobr>DeviceType</nobr> |  | The device type filter for the configuration policies. Valid values are "windows81", "macOSExtensions", "macOSCustom", "macOSDeviceFeatures", "macOSGeneral", "macOSSoftwareUpdate", "macOSEndpointProtection", "androidWorkProfileGeneral", "androidWorkProfileVpn", "windowsHealthMonitoring", "windows81SCEP", "windows10Custom", "windows10EndpointProtection", "windows10General", and "all". The default value is "all". | false | false | all |
-| <nobr>ExportPath</nobr> |  | The directory path where the Device Configuration policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ExportPath</nobr> |  | The directory path where the Device Configuration policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a directory path as input.
+ - \[string\] The cmdlet accepts a directory path as input.
 
 ### Outputs
- - \\[void\] This cmdlet does not output any objects.
+ - \[void\] This cmdlet does not output any objects.
 
 ### Note
 The cmdlet uses the following functions: - New-EmMdmBackupDirectory - Connect-EmMdmGraph - Get-EMMdmConfigurationAPI - Backup-EmMdmPolicy - Disconnect-MgGraph
@@ -307,16 +369,16 @@ Backup-EmMdmEndpointSecurity [-ExportPath] <String> [[-AuthObject] <EmMdmAuthBas
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ExportPath</nobr> |  | The directory path where the Endpoint Security policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ExportPath</nobr> |  | The directory path where the Endpoint Security policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a directory path as input.
+ - \[string\] The cmdlet accepts a directory path as input.
 
 ### Outputs
- - \\[void\] This cmdlet does not output any objects.
+ - \[void\] This cmdlet does not output any objects.
 
 ### Note
 The cmdlet uses the following functions: - New-EmMdmBackupDirectory - Connect-EmMdmGraph - Get-EmEndpointSecurityTemplate - Get-EmDMIntent - Get-EmDMTemplateSettingCategory - Get-EmDMSettingInstance - Backup-EmMdmPolicy - Disconnect-MgGraph
@@ -354,17 +416,17 @@ Backup-EmMdmSettingsCatalog [-ExportPath] <String> [[-Platform] <String>] [[-Aut
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ExportPath</nobr> |  | The directory path where the Settings Catalog policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ExportPath</nobr> |  | The directory path where the Settings Catalog policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>Platform</nobr> |  | The platform for which to retrieve policies. Valid values are "windows10" and "macOS". The default value is null, which retrieves policies for all platforms. | false | false |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a directory path as input.
+ - \[string\] The cmdlet accepts a directory path as input.
 
 ### Outputs
- - \\[void\] This cmdlet does not output any objects.
+ - \[void\] This cmdlet does not output any objects.
 
 ### Note
 The cmdlet uses the following functions: - New-EmMdmBackupDirectory - Connect-EmMdmGraph - Get-EmMdmSettingsCatalogAPI - Get-EmMdmSettingsCatalogSettingsAPI - Backup-EmMdmPolicy - Disconnect-MgGraph
@@ -402,16 +464,16 @@ Backup-EmMdmSoftwareUpdate [-ExportPath] <String> [[-AuthObject] <EmMdmAuthBase>
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ExportPath</nobr> |  | The directory path where the Software Update policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ExportPath</nobr> |  | The directory path where the Software Update policies will be exported. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a directory path as input.
+ - \[string\] The cmdlet accepts a directory path as input.
 
 ### Outputs
- - \\[void\] This cmdlet does not output any objects.
+ - \[void\] This cmdlet does not output any objects.
 
 ### Note
 The cmdlet uses the following functions: - New-EmMdmBackupDirectory - Connect-EmMdmGraph - Get-EmMdmConfigurationAPI - Backup-EmMdmPolicy - Disconnect-MgGraph
@@ -445,10 +507,10 @@ Compare-EmMgClass [-Class1] <Type> [-Class2] <Type> [<CommonParameters>]
 | <nobr>Class1</nobr> |  | The first class to compare. This parameter is mandatory. | true | false |  |
 | <nobr>Class2</nobr> |  | The second class to compare. This parameter is mandatory. | true | false |  |
 ### Inputs
- - \\[Type\] The cmdlet accepts two class types as input.
+ - \[Type\] The cmdlet accepts two class types as input.
 
 ### Outputs
- - \\[string\] The cmdlet outputs a string indicating whether the classes are different or identical. It also outputs the specific property and method differences, if any.
+ - \[string\] The cmdlet outputs a string indicating whether the classes are different or identical. It also outputs the specific property and method differences, if any.
 
 ### Note
 The cmdlet uses the Compare-Object cmdlet to compare properties and methods of the specified classes.
@@ -483,10 +545,10 @@ Convert-EmMgJsonToClass [-Json] <String> [-ClassName] <String> [-Operation] <Str
 | <nobr>ClassName</nobr> |  | The name of the class to be generated. This parameter is mandatory. | true | false |  |
 | <nobr>Operation</nobr> |  | The operation type to customize the generated class. Valid values are "create", "update", and "get". This parameter is mandatory. | true | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a JSON string and a class name as input.
+ - \[string\] The cmdlet accepts a JSON string and a class name as input.
 
 ### Outputs
- - \\[string\] The cmdlet outputs the generated PowerShell class definition as a string.
+ - \[string\] The cmdlet outputs the generated PowerShell class definition as a string.
 
 ### Note
 The cmdlet generates a PowerShell class with properties, a default constructor, and a parameterized constructor based on the JSON string. The cmdlet uses different operations to customize the class properties and constructors.
@@ -520,13 +582,13 @@ Convert-EmMgJsonToFlatObject -JSON <String> [<CommonParameters>]
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ImportPath</nobr> |  | The path to the JSON file to be imported. This parameter is mandatory when using the 'Import' parameter set. | true | true \(ByPropertyName\) |  |
-| <nobr>JSON</nobr> |  | The JSON string to be converted to a flat object. This parameter is mandatory when using the 'StringObject' parameter set. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ImportPath</nobr> |  | The path to the JSON file to be imported. This parameter is mandatory when using the 'Import' parameter set. | true | true \(ByPropertyName\\) |  |
+| <nobr>JSON</nobr> |  | The JSON string to be converted to a flat object. This parameter is mandatory when using the 'StringObject' parameter set. | true | true \(ByValue, ByPropertyName\\) |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a JSON string or a file path as input.
+ - \[string\] The cmdlet accepts a JSON string or a file path as input.
 
 ### Outputs
- - \\[PSCustomObject\] The cmdlet outputs a flat PowerShell object.
+ - \[PSCustomObject\] The cmdlet outputs a flat PowerShell object.
 
 ### Note
 The cmdlet uses the ConvertTo-FlatObject function to flatten the JSON structure. The cmdlet supports two parameter sets: 'Import' for importing JSON from a file and 'StringObject' for converting JSON strings. Borrowed private function code from: https://powersnippets.com/convertto-flatobject/
@@ -572,7 +634,7 @@ Get-EmMdmAppConfiguration [[-AuthObject] <EmMdmAuthBase>] [[-graphApiVersion] <S
  - None. This cmdlet does not accept pipeline input.
 
 ### Outputs
- - \\[GetEmMdmTargetedManagedAppConfiguration\\[\]\] The cmdlet returns an array of Intune App Configuration policy objects.
+ - \[GetEmMdmTargetedManagedAppConfiguration\[\]\] The cmdlet returns an array of Intune App Configuration policy objects.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Get-EmMdmAppConfigurationAPI - Disconnect-MgGraph
@@ -618,7 +680,7 @@ Get-EmMdmAppProtection [[-AuthObject] <EmMdmAuthBase>] [[-graphApiVersion] <Stri
  - None. This cmdlet does not accept pipeline input.
 
 ### Outputs
- - \\[pscustomobject\\[\]\] The cmdlet returns an array of Intune App Protection policy objects.
+ - \[pscustomobject\[\]\] The cmdlet returns an array of Intune App Protection policy objects.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Get-EmMdmAppProtectionAPI - Disconnect-MgGraph
@@ -772,7 +834,7 @@ Get-EmMdmEndpointSecurity [[-AuthObject] <EmMdmAuthBase>] [[-graphApiVersion] <S
  - None. This cmdlet does not accept pipeline input.
 
 ### Outputs
- - EmDManagementIntentInstanceCustom\\[\] The cmdlet returns an array of EmDManagementIntentInstanceCustom objects representing the Endpoint Security policies.
+ - EmDManagementIntentInstanceCustom\[\] The cmdlet returns an array of EmDManagementIntentInstanceCustom objects representing the Endpoint Security policies.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Get-EmEndpointSecurityTemplate - Get-EmDMIntent - Get-EmDMTemplateSettingCategory - Get-EmDMSettingInstance - Disconnect-MgGraph
@@ -807,7 +869,7 @@ Get-EmMdmGraphAuth [-CertificateThumbprintClientId] <String> [-CertificateThumbp
 
 Get-EmMdmGraphAuth [-CertificateNameClientId] <String> [-CertificateNameTenantId] <String> [-CertificateName] <String> [<CommonParameters>]
 
-Get-EmMdmGraphAuth [-ManagedIdentity] <String> [<CommonParameters>]
+Get-EmMdmGraphAuth [-UserAuthManagedIdentity] <String> [<CommonParameters>]
 
 Get-EmMdmGraphAuth [-SystemAssignedIdentity] [<CommonParameters>]
 
@@ -832,7 +894,7 @@ Get-EmMdmGraphAuth [-X509CertificateClientId] <String> [-X509Certificate] <X509C
 | <nobr>CertificateNameClientId</nobr> |  | The Client ID for the application using Certificate Name authentication. Mandatory for CertificateName parameter set. | true | false |  |
 | <nobr>CertificateNameTenantId</nobr> |  | The Tenant ID for the application using Certificate Name authentication. Mandatory for CertificateName parameter set. | true | false |  |
 | <nobr>CertificateName</nobr> |  | The Certificate Name for the application using Certificate Name authentication. Mandatory for CertificateName parameter set. | true | false |  |
-| <nobr>ManagedIdentity</nobr> |  | The Client ID for the Managed Identity. Mandatory for ManagedIdentity parameter set. | true | false |  |
+| <nobr>UserAuthManagedIdentity</nobr> |  | The Client ID for the Managed Identity. Mandatory for UserAuthManagedIdentity parameter set. | true | false |  |
 | <nobr>SystemAssignedIdentity</nobr> |  | Indicates the use of a System Assigned Identity for authentication. Mandatory for SystemAssignedIdentity parameter set. | true | false | False |
 | <nobr>AccessToken</nobr> |  | Specifies a bearer token for Microsoft Graph service. Mandatory for AccessToken parameter set. | true | false |  |
 | <nobr>EnvironmentVariable</nobr> |  | Allows for authentication using environment variables configured on the host machine. Mandatory for EnvironmentVariable parameter set. | true | false | False |
@@ -846,7 +908,7 @@ Get-EmMdmGraphAuth [-X509CertificateClientId] <String> [-X509Certificate] <X509C
  - PSCustomObject Returns an authentication object for connecting to Microsoft Graph.
 
 ### Note
-https://criticalsolutionsnetwork.github.io/MemPolicyManager/\\#Get-EmMdmGraphAuth
+https://criticalsolutionsnetwork.github.io/MemPolicyManager/\#Get-EmMdmGraphAuth
 
 ### Examples
 **EXAMPLE 1**
@@ -876,7 +938,7 @@ Creates an authentication object using Certificate Name authentication.
 
 **EXAMPLE 4**
 ```powershell
-$authObject = Get-EmMdmGraphAuth -ManagedIdentity "your-client-id"
+$authObject = Get-EmMdmGraphAuth -UserAuthManagedIdentity $ClientId
 Creates an authentication object using Managed Identity authentication.
 ```
 
@@ -932,7 +994,7 @@ Get-EmMdmSoftwareUpdate [[-AuthObject] <EmMdmAuthBase>] [[-graphApiVersion] <Str
  - None. This cmdlet does not accept pipeline input.
 
 ### Outputs
- - \\[pscustomobject\\[\]\] The cmdlet returns an array of PSCustomObject representing the Device Update policies.
+ - \[pscustomobject\[\]\] The cmdlet returns an array of PSCustomObject representing the Device Update policies.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Get-EmMdmConfigurationAPI - Disconnect-MgGraph
@@ -970,13 +1032,13 @@ Get-EmMgMetadataXml [-OutputPath] <String> [-graphApiVersion <String>] [<CommonP
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>OutputPath</nobr> |  | The file path where the metadata XML file will be saved. This parameter is mandatory. | true | true \(ByPropertyName\) |  |
+| <nobr>OutputPath</nobr> |  | The file path where the metadata XML file will be saved. This parameter is mandatory. | true | true \(ByPropertyName\\) |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 ### Inputs
  - None. This cmdlet does not accept pipeline input.
 
 ### Outputs
- - \\[string\] The cmdlet outputs a message indicating the success or failure of the metadata XML download.
+ - \[string\] The cmdlet outputs a message indicating the success or failure of the metadata XML download.
 
 ### Note
 The cmdlet uses the following functions: - Invoke-WebRequest
@@ -1021,7 +1083,7 @@ Get-EmMgMetadataXmlInfo [-XmlFilePath] <String> [-TypeName] <String> [[-InfoType
  - None. This cmdlet does not accept pipeline input.
 
 ### Outputs
- - \\[PSCustomObject\] The cmdlet outputs a custom object containing detailed information about the specified entity type, including its properties, methods, actions, enums, relationships, and a JSON representation.
+ - \[PSCustomObject\] The cmdlet outputs a custom object containing detailed information about the specified entity type, including its properties, methods, actions, enums, relationships, and a JSON representation.
 
 ### Note
 The cmdlet uses XPath queries to navigate the metadata XML and extract relevant information.
@@ -1061,10 +1123,10 @@ Get-EmMgResourceJson [-ODataTypes] <String[]> [<CommonParameters>]
 | - | - | - | - | - | - |
 | <nobr>ODataTypes</nobr> |  | An array of OData types for which to retrieve JSON resource data. This parameter is mandatory. | true | false |  |
 ### Inputs
- - \\[string\\[\]\] The cmdlet accepts an array of OData types as input.
+ - \[string\[\]\] The cmdlet accepts an array of OData types as input.
 
 ### Outputs
- - \\[PSCustomObject\] The cmdlet outputs a custom object containing the JSON representation and properties table of the specified OData types.
+ - \[PSCustomObject\] The cmdlet outputs a custom object containing the JSON representation and properties table of the specified OData types.
 
 ### Note
 The cmdlet constructs the URL to the Microsoft Graph API documentation for each specified OData type, downloads the markdown content, and parses the JSON resource data and properties table.
@@ -1100,10 +1162,10 @@ Get-EmMgResourceOperationJson [-ODataTypes] <String[]> [-Operation] <String> [-R
 | <nobr>Resource</nobr> |  | The resource type for which to retrieve JSON examples. Valid values are "intune-deviceconfig" and "intune-mam". This parameter is mandatory. | true | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 ### Inputs
- - \\[string\\[\]\] The cmdlet accepts an array of OData types as input.
+ - \[string\[\]\] The cmdlet accepts an array of OData types as input.
 
 ### Outputs
- - \\[PSCustomObject\] The cmdlet outputs a custom object containing JSON examples for the specified OData types and operations.
+ - \[PSCustomObject\] The cmdlet outputs a custom object containing JSON examples for the specified OData types and operations.
 
 ### Note
 The cmdlet constructs the URL to the Microsoft Graph API documentation for each specified OData type and operation, downloads the markdown content, and parses the JSON examples.
@@ -1134,16 +1196,16 @@ Import-EmMdmAppConfiguration [-ImportPath] <String> [[-AuthObject] <EmMdmAuthBas
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the App Configuration policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the App Configuration policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a file path as input.
+ - \[string\] The cmdlet accepts a file path as input.
 
 ### Outputs
- - \\[string\] The cmdlet outputs the ID of the created policy.
+ - \[string\] The cmdlet outputs the ID of the created policy.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Add-EmMdmAppConfiguration - Disconnect-MgGraph
@@ -1174,16 +1236,16 @@ Import-EmMdmAppProtection [-ImportPath] <String> [[-AuthObject] <EmMdmAuthBase>]
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the App Protection policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the App Protection policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a file path as input.
+ - \[string\] The cmdlet accepts a file path as input.
 
 ### Outputs
- - \\[string\] The cmdlet outputs the ID of the created policy.
+ - \[string\] The cmdlet outputs the ID of the created policy.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Add-EmMdmAppProtection - Disconnect-MgGraph
@@ -1214,16 +1276,16 @@ Import-EmMdmCompliance [-ImportPath] <String> [[-AuthObject] <EmMdmAuthBase>] [[
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Compliance policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Compliance policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a file path as input.
+ - \[string\] The cmdlet accepts a file path as input.
 
 ### Outputs
- - \\[pscustomobject\] The cmdlet outputs the result of the created policy.
+ - \[pscustomobject\] The cmdlet outputs the result of the created policy.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Add-EmMdmCompliance - Disconnect-MgGraph
@@ -1254,16 +1316,16 @@ Import-EmMdmConfiguration [-ImportPath] <String> [[-AuthObject] <EmMdmAuthBase>]
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Device Configuration policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Device Configuration policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a file path as input.
+ - \[string\] The cmdlet accepts a file path as input.
 
 ### Outputs
- - \\[string\] The cmdlet outputs the result of the created policy.
+ - \[string\] The cmdlet outputs the result of the created policy.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Add-EmMdmConfiguration - Disconnect-MgGraph
@@ -1294,16 +1356,16 @@ Import-EmMdmEndpointSecurity [-ImportPath] <String> [[-AuthObject] <EmMdmAuthBas
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Endpoint Security policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Endpoint Security policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a file path as input.
+ - \[string\] The cmdlet accepts a file path as input.
 
 ### Outputs
- - \\[PSCustomObject\] The cmdlet outputs the result of the created policy.
+ - \[PSCustomObject\] The cmdlet outputs the result of the created policy.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Add-EmMdmEndpointSecurity - Disconnect-MgGraph
@@ -1334,16 +1396,16 @@ Import-EmMdmSettingsCatalog [-ImportPath] <String> [[-AuthObject] <EmMdmAuthBase
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Settings Catalog policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Settings Catalog policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a file path as input.
+ - \[string\] The cmdlet accepts a file path as input.
 
 ### Outputs
- - \\[void\] This cmdlet does not output any objects.
+ - \[void\] This cmdlet does not output any objects.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Add-EmMdmSettingsCatalog - Disconnect-MgGraph
@@ -1374,16 +1436,16 @@ Import-EmMdmSoftwareUpdate [-ImportPath] <String> [[-AuthObject] <EmMdmAuthBase>
 ### Parameters
 | Name  | Alias  | Description | Required? | Pipeline Input | Default Value |
 | - | - | - | - | - | - |
-| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Software Update policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\) |  |
+| <nobr>ImportPath</nobr> |  | The file path to the JSON file containing the Software Update policy to import. This parameter is mandatory. | true | true \(ByValue, ByPropertyName\\) |  |
 | <nobr>AuthObject</nobr> |  | The authentication object used for connecting to Microsoft Graph. | false | false |  |
 | <nobr>graphApiVersion</nobr> |  | The version of the Microsoft Graph API to use. Valid values are "beta" and "v1.0". The default value is "beta". | false | false | beta |
 | <nobr>WhatIf</nobr> | wi |  | false | false |  |
 | <nobr>Confirm</nobr> | cf |  | false | false |  |
 ### Inputs
- - \\[string\] The cmdlet accepts a file path as input.
+ - \[string\] The cmdlet accepts a file path as input.
 
 ### Outputs
- - \\[string\] The ID of the created policy.
+ - \[string\] The ID of the created policy.
 
 ### Note
 The cmdlet uses the following functions: - Connect-EmMdmGraph - Add-EmMdmConfiguration - Disconnect-MgGraph
