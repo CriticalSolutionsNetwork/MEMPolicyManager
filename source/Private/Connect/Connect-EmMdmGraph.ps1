@@ -44,16 +44,19 @@ function Connect-EmMdmGraph {
                     Connect-MgGraph -ClientId $AuthObject.CertificateNameClientId -TenantId $AuthObject.CertificateNameTenantId -CertificateName $AuthObject.CertificateName | Out-Null #-Scopes $Scopes
                 }
                 "EmMdmAuthManagedIdentity" {
-                    Connect-MgGraph -Identity -Scopes $Scopes | Out-Null
+                    Connect-MgGraph -Identity | Out-Null #-Scopes $Scopes
+                }
+                "EmMdmUserAuthManagedIdentity" {
+                    Connect-MgGraph -Identity -ClientId $AuthObject.ClientId | Out-Null #-Scopes $Scopes
                 }
                 "EmMdmAuthAccessToken" {
-                    Connect-MgGraph -AccessToken $AuthObject.AccessToken -Scopes $Scopes | Out-Null
+                    Connect-MgGraph -AccessToken $AuthObject.AccessToken | Out-Null #-Scopes $Scopes
                 }
                 "EmMdmAuthEnvironmentVariable" {
-                    Connect-MgGraph -EnvironmentVariable -Scopes $Scopes | Out-Null
+                    Connect-MgGraph -EnvironmentVariable | Out-Null
                 }
                 "EmMdmAuthX509Certificate" {
-                    Connect-MgGraph -ClientId $AuthObject.ClientId  -TenantId $AuthObject.TenantId -Certificate $AuthObject.Certificate | Out-Null #-Scopes $Scopes | Out-Null
+                    Connect-MgGraph -ClientId $AuthObject.ClientId -TenantId $AuthObject.TenantId -Certificate $AuthObject.Certificate | Out-Null #-Scopes $Scopes | Out-Null
                 }
             }
         } else {

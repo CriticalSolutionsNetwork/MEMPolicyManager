@@ -132,9 +132,9 @@ function Get-EmMdmGraphAuth {
         [ValidateNotNullOrEmpty()]
         [string]$CertificateName,
 
-        [Parameter(Mandatory = $true, ParameterSetName = "ManagedIdentity", Position = 0, HelpMessage = "The Client ID for the Managed Identity.")]
+        [Parameter(Mandatory = $true, ParameterSetName = "UserAuthManagedIdentity", Position = 0, HelpMessage = "The Client ID for the Managed Identity.")]
         [ValidateNotNullOrEmpty()]
-        [string]$ManagedIdentity,
+        [string]$UserAuthManagedIdentity,
 
         [Parameter(Mandatory = $true, ParameterSetName = "SystemAssignedIdentity", Position = 0, HelpMessage = "Indicates the use of a System Assigned Identity for authentication.")]
         [switch]$SystemAssignedIdentity,
@@ -158,34 +158,41 @@ function Get-EmMdmGraphAuth {
         [ValidateNotNullOrEmpty()]
         [string]$X509CertificateTenantId
     )
-    switch ($PSCmdlet.ParameterSetName) {
-        "ClientSecret" {
-            return [EmMdmAuthClientSecret]::new($ClientSecretTenantId, $ClientSecretValue)
-        }
-        "CertificateThumbprint" {
-            return [EmMdmAuthCertificateThumbprint]::new($CertificateThumbprintClientId, $CertificateThumbprintTenantId, $CertificateThumbprint)
-        }
-        "CertificateName" {
-            return [EmMdmAuthCertificateName]::new($CertificateNameClientId, $CertificateNameTenantId, $CertificateName)
-        }
-        "ManagedIdentity" {
-            return [EmMdmAuthManagedIdentity]::new($ManagedIdentity)
-        }
-        "SystemAssignedIdentity" {
-            if ($SystemAssignedIdentity) {
-                return [EmMdmAuthManagedIdentity]::new($true)
+    process {
+        try {
+            switch ($PSCmdlet.ParameterSetName) {
+                "ClientSecret" {
+                    return [EmMdmAuthClientSecret]::new($ClientSecretTenantId, $ClientSecretValue)
+                }
+                "CertificateThumbprint" {
+                    return [EmMdmAuthCertificateThumbprint]::new($CertificateThumbprintClientId, $CertificateThumbprintTenantId, $CertificateThumbprint)
+                }
+                "CertificateName" {
+                    return [EmMdmAuthCertificateName]::new($CertificateNameClientId, $CertificateNameTenantId, $CertificateName)
+                }
+                "UserAuthManagedIdentity" {
+                    return [EmMdmUserAuthManagedIdentity]::new($UserAuthManagedIdentity)
+                }
+                "SystemAssignedIdentity" {
+                    if ($SystemAssignedIdentity) {
+                        return [EmMdmAuthManagedIdentity]::new($true)
+                    }
+                }
+                "AccessToken" {
+                    return [EmMdmAuthAccessToken]::new($AccessToken)
+                }
+                "EnvironmentVariable" {
+                    if ($EnvironmentVariable) {
+                        return [EmMdmAuthEnvironmentVariable]::new()
+                    }
+                }
+                "X509Certificate" {
+                    return [EmMdmAuthX509Certificate]::new($X509CertificateClientId, $X509CertificateTenantId, $X509Certificate )
+                }
             }
         }
-        "AccessToken" {
-            return [EmMdmAuthAccessToken]::new($AccessToken)
-        }
-        "EnvironmentVariable" {
-            if ($EnvironmentVariable) {
-                return [EmMdmAuthEnvironmentVariable]::new()
-            }
-        }
-        "X509Certificate" {
-            return [EmMdmAuthX509Certificate]::new($X509CertificateClientId,$X509CertificateTenantId, $X509Certificate )
+        catch {
+            throw "Get-EMMdmGraphAuth Error: `n$_"
         }
     }
 }
