@@ -40,9 +40,9 @@
     .PARAMETER CertificateName
         The Certificate Name for the application using Certificate Name authentication.
         Mandatory for CertificateName parameter set.
-    .PARAMETER ManagedIdentity
+    .PARAMETER UserAuthManagedIdentity
         The Client ID for the Managed Identity.
-        Mandatory for ManagedIdentity parameter set.
+        Mandatory for UserAuthManagedIdentity parameter set.
     .PARAMETER SystemAssignedIdentity
         Indicates the use of a System Assigned Identity for authentication.
         Mandatory for SystemAssignedIdentity parameter set.
@@ -80,7 +80,7 @@
         PS> $authObject = Get-EmMdmGraphAuth -CertificateNameClientId $ClientId -CertificateNameTenantId $TenantId -CertificateName $CertName
         Creates an authentication object using Certificate Name authentication.
     .EXAMPLE
-        PS> $authObject = Get-EmMdmGraphAuth -ManagedIdentity "your-client-id"
+        PS> $authObject = Get-EmMdmGraphAuth -UserAuthManagedIdentity $ClientId
         Creates an authentication object using Managed Identity authentication.
     .EXAMPLE
         PS> $authObject = Get-EmMdmGraphAuth -SystemAssignedIdentity
@@ -132,9 +132,9 @@ function Get-EmMdmGraphAuth {
         [ValidateNotNullOrEmpty()]
         [string]$CertificateName,
 
-        [Parameter(Mandatory = $true, ParameterSetName = "ManagedIdentity", Position = 0, HelpMessage = "The Client ID for the Managed Identity.")]
+        [Parameter(Mandatory = $true, ParameterSetName = "UserAuthManagedIdentity", Position = 0, HelpMessage = "The Client ID for the Managed Identity.")]
         [ValidateNotNullOrEmpty()]
-        [string]$ManagedIdentity,
+        [string]$UserAuthManagedIdentity,
 
         [Parameter(Mandatory = $true, ParameterSetName = "SystemAssignedIdentity", Position = 0, HelpMessage = "Indicates the use of a System Assigned Identity for authentication.")]
         [switch]$SystemAssignedIdentity,
@@ -158,34 +158,41 @@ function Get-EmMdmGraphAuth {
         [ValidateNotNullOrEmpty()]
         [string]$X509CertificateTenantId
     )
-    switch ($PSCmdlet.ParameterSetName) {
-        "ClientSecret" {
-            return [EmMdmAuthClientSecret]::new($ClientSecretTenantId, $ClientSecretValue)
-        }
-        "CertificateThumbprint" {
-            return [EmMdmAuthCertificateThumbprint]::new($CertificateThumbprintClientId, $CertificateThumbprintTenantId, $CertificateThumbprint)
-        }
-        "CertificateName" {
-            return [EmMdmAuthCertificateName]::new($CertificateNameClientId, $CertificateNameTenantId, $CertificateName)
-        }
-        "ManagedIdentity" {
-            return [EmMdmAuthManagedIdentity]::new($ManagedIdentity)
-        }
-        "SystemAssignedIdentity" {
-            if ($SystemAssignedIdentity) {
-                return [EmMdmAuthManagedIdentity]::new($true)
+    process {
+        try {
+            switch ($PSCmdlet.ParameterSetName) {
+                "ClientSecret" {
+                    return [EmMdmAuthClientSecret]::new($ClientSecretTenantId, $ClientSecretValue)
+                }
+                "CertificateThumbprint" {
+                    return [EmMdmAuthCertificateThumbprint]::new($CertificateThumbprintClientId, $CertificateThumbprintTenantId, $CertificateThumbprint)
+                }
+                "CertificateName" {
+                    return [EmMdmAuthCertificateName]::new($CertificateNameClientId, $CertificateNameTenantId, $CertificateName)
+                }
+                "UserAuthManagedIdentity" {
+                    return [EmMdmUserAuthManagedIdentity]::new($UserAuthManagedIdentity)
+                }
+                "SystemAssignedIdentity" {
+                    if ($SystemAssignedIdentity) {
+                        return [EmMdmAuthManagedIdentity]::new($true)
+                    }
+                }
+                "AccessToken" {
+                    return [EmMdmAuthAccessToken]::new($AccessToken)
+                }
+                "EnvironmentVariable" {
+                    if ($EnvironmentVariable) {
+                        return [EmMdmAuthEnvironmentVariable]::new()
+                    }
+                }
+                "X509Certificate" {
+                    return [EmMdmAuthX509Certificate]::new($X509CertificateClientId, $X509CertificateTenantId, $X509Certificate )
+                }
             }
         }
-        "AccessToken" {
-            return [EmMdmAuthAccessToken]::new($AccessToken)
-        }
-        "EnvironmentVariable" {
-            if ($EnvironmentVariable) {
-                return [EmMdmAuthEnvironmentVariable]::new()
-            }
-        }
-        "X509Certificate" {
-            return [EmMdmAuthX509Certificate]::new($X509CertificateClientId,$X509CertificateTenantId, $X509Certificate )
+        catch {
+            throw "Get-EMMdmGraphAuth Error: `n$_"
         }
     }
 }

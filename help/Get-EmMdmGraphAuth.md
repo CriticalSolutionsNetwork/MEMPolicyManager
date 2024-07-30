@@ -30,9 +30,10 @@ Get-EmMdmGraphAuth [-CertificateNameClientId] <String> [-CertificateNameTenantId
  [-CertificateName] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
-### ManagedIdentity
+### UserAuthManagedIdentity
 ```
-Get-EmMdmGraphAuth [-ManagedIdentity] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Get-EmMdmGraphAuth [-UserAuthManagedIdentity] <String> [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ### SystemAssignedIdentity
@@ -240,13 +241,12 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ManagedIdentity
+### -UserAuthManagedIdentity
 The Client ID for the Managed Identity.
-Mandatory for ManagedIdentity parameter set.
 
 ```yaml
 Type: String
-Parameter Sets: ManagedIdentity
+Parameter Sets: UserAuthManagedIdentity
 Aliases:
 
 Required: True

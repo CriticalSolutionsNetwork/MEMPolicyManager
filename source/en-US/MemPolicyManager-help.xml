@@ -3198,9 +3198,9 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
       <command:syntaxItem>
         <maml:name>Get-EmMdmGraphAuth</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-          <maml:name>ManagedIdentity</maml:name>
+          <maml:name>UserAuthManagedIdentity</maml:name>
           <maml:description>
-            <maml:para>The Client ID for the Managed Identity. Mandatory for ManagedIdentity parameter set.</maml:para>
+            <maml:para>The Client ID for the Managed Identity.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3451,9 +3451,9 @@ This example connects to Microsoft Graph using the 'v1.0' API version and retrie
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-        <maml:name>ManagedIdentity</maml:name>
+        <maml:name>UserAuthManagedIdentity</maml:name>
         <maml:description>
-          <maml:para>The Client ID for the Managed Identity. Mandatory for ManagedIdentity parameter set.</maml:para>
+          <maml:para>The Client ID for the Managed Identity.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>

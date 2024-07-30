@@ -45,6 +45,14 @@ class EmMdmAuthManagedIdentity : EmMdmAuthBase {
     }
 }
 
+# User managed identity authentication class
+class EmMdmUserAuthManagedIdentity : EmMdmAuthBase {
+    [string]$ClientId
+    EmMdmUserAuthManagedIdentity([string]$clientId) : base() {
+        $this.ClientId = $clientId
+    }
+}
+
 # Access token authentication class
 class EmMdmAuthAccessToken : EmMdmAuthBase {
     [SecureString]$AccessToken
