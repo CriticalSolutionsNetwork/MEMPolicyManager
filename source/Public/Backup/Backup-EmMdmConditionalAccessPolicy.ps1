@@ -31,8 +31,8 @@ function Backup-EmMdmConditionalAccessPolicy {
             if ($PSCmdlet.ShouldProcess("Creating directory `"$(Split-Path -Path $ExportPath -Leaf)`" in `"$(Split-Path -Path $ExportPath -Parent)`" if not found.", "New-Item")) {
                 New-EmMdmBackupDirectory -ExportPath $ExportPath -Confirm:$false
             }
-            if ($PSCmdlet.ShouldProcess("Connecting to MgGraph with scopes DeviceManagementApps.Read.All", "Connect-MgGraph")) {
-                $isConnected = Connect-EmMdmGraph -Scopes "DeviceManagementApps.Read.All" -AuthObject $AuthObject
+            if ($PSCmdlet.ShouldProcess("Connecting to MgGraph with scopes DeviceManagementConfiguration.Read.All", "Connect-MgGraph")) {
+                $isConnected = Connect-EmMdmGraph -Scopes "DeviceManagementConfiguration.Read.All" -AuthObject $AuthObject
             }
         }
         catch {
@@ -41,14 +41,14 @@ function Backup-EmMdmConditionalAccessPolicy {
     }
     process {
         try {
-            if ($isConnected -and $PSCmdlet.ShouldProcess("Getting App Configuration policies and exporting to JSON", "Get-EmMdmAppConfigurationAPI")) {
-                $APPs = Get-EmMdmAppConfigurationAPI -graphApiVersion $graphApiVersion
+            if ($isConnected -and $PSCmdlet.ShouldProcess("Getting Conditional Access policies and exporting to JSON", "Get-EmMdmAppConfigurationAPI")) {
+                $APPs = Get-EmMdmConditionalAccessPolicyAPI -graphApiVersion $graphApiVersion
                 if ($APPs.Length -eq 0) {
                     Write-Verbose "No policies found" -Verbose
                     throw "No policies found"
                 }
-                Write-Verbose "Exporting App Configuration policies..." -Verbose
-                Backup-EmMdmPolicy -Policy $APPs -ExportPath $ExportPath -PolicyType "App Configuration"
+                Write-Verbose "Exporting Conditional Access policies..." -Verbose
+                Backup-EmMdmPolicy -Policy $APPs -ExportPath $ExportPath -PolicyType "Conditional Access"
                 <#
                     foreach ($APP in $APPs) {
                         Write-Verbose "APP Protection Policy:"$APP.displayName -f Yellow
@@ -60,7 +60,7 @@ function Backup-EmMdmConditionalAccessPolicy {
             }
         }
         catch {
-            throw "An error occurred while getting the App Configuration policies: `n$_"
+            throw "An error occurred while getting the Conditional Access policies: `n$_"
         }
         finally {
             if ($isConnected) {
@@ -71,7 +71,7 @@ function Backup-EmMdmConditionalAccessPolicy {
     }
     end {
         if ($ExportComplete) {
-            Write-Verbose "Backup-EmMdmAppConfiguration completed." -Verbose
+            Write-Verbose "Backup-EmMdmConditionalAccessPolicy completed." -Verbose
         }
     }
 }
