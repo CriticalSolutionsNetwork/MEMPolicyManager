@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added compliance policy management functions.
+
+## [0.1.4] - 2024-07-30
+
+### Added
+
 - Added access token authentication
 - Added User Managed Identity auth - Needs Testing
 - Added System Manged Identity auth - Needs Testing
