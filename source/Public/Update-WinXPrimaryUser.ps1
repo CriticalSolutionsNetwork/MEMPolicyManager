@@ -1,21 +1,21 @@
-<#
-    .SYNOPSIS
-        Removes and updates the primary user for specified devices in Microsoft Intune.
-    .DESCRIPTION
-        This function removes the primary user from specified devices and assigns the last logged-on user (retrieved via the Beta API) as the new primary user.
-    .PARAMETER DeviceNames
-        An array of device names for which the primary user will be updated.
-    .PARAMETER PreviewOnly
-        If specified, the function will display the proposed changes without making modifications.
-    .EXAMPLE
-        Update-WinXPrimaryUser -DeviceNames @('HostA', 'HostB') -PreviewOnly
-    .EXAMPLE
-        Update-WinXPrimaryUser -DeviceNames @('HostA', 'HostB') -Confirm
-    .NOTES
-        Author: Doug Rios
-        Date: March 4, 2025
-#>
 function Update-WinXPrimaryUser {
+    <#
+        .SYNOPSIS
+            Removes and updates the primary user for specified devices in Microsoft Intune.
+        .DESCRIPTION
+            This function removes the primary user from specified devices and assigns the last logged-on user (retrieved via the Beta API) as the new primary user.
+        .PARAMETER DeviceNames
+            An array of device names for which the primary user will be updated.
+        .PARAMETER PreviewOnly
+            If specified, the function will display the proposed changes without making modifications.
+        .EXAMPLE
+            Update-WinXPrimaryUser -DeviceNames @('HostA', 'HostB') -PreviewOnly
+        .EXAMPLE
+            Update-WinXPrimaryUser -DeviceNames @('HostA', 'HostB') -Confirm
+        .NOTES
+            Author: Doug Rios
+            Date: March 4, 2025
+    #>
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     param (
         [string[]]$DeviceNames,
